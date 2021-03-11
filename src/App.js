@@ -1,13 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import { MenuItem, FormControl, Select, Card, CardContent } from '@material-ui/core';
 import './App.css';
-import InfoBox from './InfoBox'
-import Map from './Map'
+import InfoBox from './InfoBox';
+import Map from './Map';
+import Table from './Table'
 
 function App() {
   const [countries, setCountries] = useState([])
   const [country, setCountry] = useState('worldwide')
   const [countryInfo, setCountryInfo] = useState({})
+  const [tableData, setTableData] = useState([])
+
+  useEffect(() => {
+    fetch('https://disease.sh/v3/covid-19/all')
+      .then((response) => response.json())
+      .then(data => {
+        setCountryInfo(data)
+      })
+
+  }, [])
 
   useEffect(() => {
     const getCountriesData = async () => {
@@ -20,6 +31,7 @@ function App() {
           }))
 
           setCountries(countries)
+          setTableData(data)
         })
     }
 
@@ -37,6 +49,7 @@ function App() {
       .then((data) => {
         setCountry(countryCode)
         setCountryInfo(data)
+        console.log('here is data', countryInfo)
 
       })
   }
@@ -67,9 +80,9 @@ function App() {
         </div>
 
         <div className='app__stats'>
-          <InfoBox title='CoronaVirus Cases' cases={12343} total={4423} />
-          <InfoBox title='Recovered' />
-          <InfoBox title='Dealths' />
+          <InfoBox title='CoronaVirus Cases' cases={countryInfo.todayCases} total={countryInfo.cases} />
+          <InfoBox title='Recovered' cases={countryInfo.todayRecovered} total={countryInfo.recovered} />
+          <InfoBox title='Dealths' cases={countryInfo.todayDeaths} total={countryInfo.deaths} />
 
         </div>
         <Map />
@@ -78,6 +91,7 @@ function App() {
         <Card>
           <CardContent>
             <h3> Live Cases by Country </h3>
+            <Table countries={tableData} />
             <h3> Worldwide New Cases </h3>
           </CardContent>
         </Card>
